@@ -56,4 +56,3 @@ ExecStart=/bin/sh -c "while true; do tunnelfun --config %s server & sleep 10; do
 		}
 	},
 }
-
