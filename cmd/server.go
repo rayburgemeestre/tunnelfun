@@ -5,12 +5,12 @@ package cmd
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/crypto/ssh"
+	"io"
 	"log"
+	"net"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -32,11 +32,7 @@ var serverCmd = &cobra.Command{
 			if it doesn't it will kill the process.'`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		user := viper.GetString("server.connect.user")
-		publicKey := viper.GetString("server.connect.publickey")
-		password := viper.GetString("server.connect.encryptedpass")
 		m := viper.GetStringSlice("server.tunnelports")
-		timeoutConnect := viper.GetInt("server.timeout.connect")
 		timeoutResponse := viper.GetInt("server.timeout.response")
 		monitoring := map[int]bool{}
 		for _, k := range m {
@@ -92,19 +88,36 @@ var serverCmd = &cobra.Command{
 
 				channel1 := make(chan string, 1)
 				go func() {
-					config := &ssh.ClientConfig{
-						User: user,
-						Auth: []ssh.AuthMethod{
-							publicKeyFile(publicKey, password),
-						},
-						HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-						Timeout:         time.Duration(timeoutConnect) * time.Second,
+					conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
+					if err != nil {
+						fmt.Println("dial error:", err)
+						return
 					}
-					channel1 <- executeCmd("uptime", "localhost", port, config)
+					defer conn.Close()
+
+					buf := make([]byte, 0, 4096)
+					tmp := make([]byte, 256)
+					for {
+						n, err := conn.Read(tmp)
+						if err != nil {
+							if err != io.EOF {
+								fmt.Println("read error:", err)
+							}
+							break
+						}
+						buf = append(buf, tmp[:n]...)
+
+						if strings.Contains(string(buf), "SSH") {
+							channel1 <- string(buf)
+							return
+						}
+
+					}
+					channel1 <- string(buf)
 				}()
 				select {
 				case res := <-channel1:
-					if strings.Contains(res, "load average") {
+					if strings.Contains(res, "SSH") {
 						fmt.Println("port", port, "- ok")
 					} else {
 						fmt.Println("port", port, "- killing pid", pid, "due to unexpected server response")
@@ -125,24 +138,4 @@ var serverCmd = &cobra.Command{
 		wg.Wait()
 		fmt.Println("done.")
 	},
-}
-
-func executeCmd(command, hostname string, port int, config *ssh.ClientConfig) string {
-	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", hostname, port), config)
-	if err != nil {
-		panic(err)
-	}
-	session, err := conn.NewSession()
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-
-	var stdoutBuf bytes.Buffer
-	session.Stdout = &stdoutBuf
-	err = session.Run(command)
-	if err != nil {
-		panic(err)
-	}
-	return stdoutBuf.String()
 }
