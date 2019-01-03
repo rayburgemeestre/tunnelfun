@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rayburgemeestre/jirahours.svg?branch=master)](https://travis-ci.org/rayburgemeestre/jirahours) [![MPL 2.0 License](https://img.shields.io/badge/license-MPL2.0-blue.svg)](http://veldstra.org/2016/12/09/you-should-choose-mpl2-for-your-opensource-project.html)
+[![Build Status](https://travis-ci.org/rayburgemeestre/tunnelfun.svg?branch=master)](https://travis-ci.org/rayburgemeestre/tunnelfun) [![MPL 2.0 License](https://img.shields.io/badge/license-MPL2.0-blue.svg)](http://veldstra.org/2016/12/09/you-should-choose-mpl2-for-your-opensource-project.html)
 
 ## About
 
