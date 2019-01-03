@@ -1,0 +1,50 @@
+server:
+  host: <<MASTER_SERVER>>
+  port: 22
+  connect:
+    user: root
+    publickey: /root/.ssh/id_rsa2  # the key used to connect to clients (to verify)
+    encryptedpass: <<PASSWORD>> # leave empty if public key is not encrypted using pass
+  tunnelports:
+    - 2000 # machine 1
+    - 2001 # machine 2
+    - 2002
+  timeout:
+    connect: 20 # seconds
+    response: 20 # seconds
+        
+client:
+  timeout:
+    connect: 20 # seconds
+
+clients:
+
+  machine1:
+    user: root
+    publickey: /home/root/.ssh/id_rsa  # the key used to connect to server
+    localservice:
+      host: localhost
+      port: 22
+    remoteendpoint:
+      host: localhost
+      port: 2000
+
+  machine2:
+    user: root
+    publickey: /home/foobar/.ssh/id_rsa
+    localservice:
+      host: localhost
+      port: 22
+    remoteendpoint:
+      host: localhost
+      port: 2001
+      
+  machine3:
+    user: root
+    publickey: /root/.ssh/id_rsa
+    localservice:
+      host: localhost
+      port: 42
+    remoteendpoint:
+      host: localhost
+      port: 2002
