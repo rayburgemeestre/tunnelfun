@@ -1,0 +1,10 @@
+[Unit]
+Description=Tunnelfun Client (edison)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/bin/sh -c "while true; do tunnelfun --config /home/root/tunnelfun.yaml client -C edison & sleep 10; done"
+
+[Install]
+WantedBy=multi-user.target

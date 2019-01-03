@@ -15,7 +15,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "tunnelfun",
 	Short: "tunnelfun",
-	Long:  `tunnelfun - let's tunnel all the thingz!'`,
+	Long:  `tunnelfun - let's tunnel all the thingz!`,
 }
 
 var cfgFile string

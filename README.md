@@ -47,9 +47,57 @@ existing processes, assuming they are malfunctioning.
 
 ## Usage
 
-TODO.. too lazy to write it now.
+    tunnelfun - let's tunnel all the thingz!
+    
+    Usage:
+      tunnelfun [command]
+    
+    Available Commands:
+      client      Run this on a client to connect to tunnelserver.
+      help        Help about any command
+      install     Run this to deploy systemd unit file for given client or server config.
+      server      Run this on the tunnel server, where all the tunnels connect to. Reaps dead ssh tunnels!
+    
+    Flags:
+          --config string   config file (default is $HOME/tunnelfun.yaml)
+      -h, --help            help for tunnelfun
+    
+    Use "tunnelfun [command] --help" for more information about a command.
+
+Please see the example directory for a `tunnelfun.yaml` example.
+
+* `tunnelfun server` - to run the server (reaper process) once.
+* `tunnelfun client -C <name>` - to run the client (tunnel creator) once.
+* `tunnelfun install -C <name>` - install systemd unit file that periodically runs the client tunnel command.
+* `tunnelfun install -S` - install systemd unit file that periodically runs the server reaper command.
+
+When deploying systemd services you still need to do the following:
+
+* `systemctl daemon-reload`
+* `systemctl enable tunnelfun`
+* `systemctl start tunnelfun`
+* `journalctl -fu tunnelfun` - to see what it's doing
+
+In some cases, like on my Intel Edison device that runs Yocto linux, I needed to edit the generated systemd file a bit before I could enable it.
+I've put this in the examples directory as well.
 
 ## Install
 
-TODO.. too lazy to write it now.
+Download the binary and put it somewhere in your $PATH.
 
+Put the example `tunnelfun.yaml` in your $HOME directory and edit it (obviously).
+
+## Build
+
+    go get https://github.com/rayburgemeestre/tunnelfun
+    cd ~/go/src/github.com/rayburgemeestre/tunnelfun
+    go build
+    
+For building arm (e.g. Raspberry Pi):
+
+    env GOOS=linux GOARCH=arm GOARM=5 go build
+
+For building 32 bit (e.g. Intel Edison board):
+
+    env GOOS=linux GOARCH=386 go build
+    
