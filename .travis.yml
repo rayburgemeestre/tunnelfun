@@ -9,5 +9,7 @@ deploy:
   api_key:
     secure: vdEoUZ8GHRLrKW8IBFR08opGbZcJSxPw6iKaE5VxxJe7vKPsi3gmAaxgicycumEVzH5pKleI1pD1ZP9qBMHIWSdACzgTFC9Ln1CGcHIOxhoPxq/1zFlgiwabJ5ePsPP8NB9MQUYEUa8//Ixb2CflDcIVF7NPDAxlZ83BEdyv91dTqr7DVmMZLjNohnp3qpDUsQA0WK55Hf6HPQ+eZo52V8oEPsp2fZ6rj0wVeI9p4bjHxRw9qYPV1k7v/Slr+87PJDR8eibeo9cIyDH+ofG47VtZ+me442UM88lDcrnyzpgx5G6x+L86Qu/7xXZnMHoD3Es8HLFgnmgctNc6FMr2DKKTW2ECatFICXerl0KTYl0Uw1o0yNGNuRTp1tfye8UaVXg/Vn+tvINmkf6qUmkPz9o9/zHjAH7iX+iGrbaD9ZKSlTfxrxtrXMpnz8KKRc5+lw5LP+pUrw+k78trv1opV7Hr5UpcSD4a74l/02DHR4mwlRAmqO6khVHmB7GVx/HyGZq/x/J1alXOfGPMBJjDiiFYxRkdHdcNeJiNAstw88XThQcgWLGcKFIfy34jbUz7ZfdFx446YiO8M1G/0iQ6wsq0BRa0N6cj8u4j2b1Gwu/ns+i7RlpMdAWZdMlae5nRZ5oVJi2YWp/Y2ykNIoUGaIhBB30zbaxUT8fZKslOF74=
   file: tunnelfun
+  skip_cleanup: true
   on:
+    tags: true
     repo: rayburgemeestre/tunnelfun
