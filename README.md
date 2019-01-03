@@ -19,7 +19,9 @@ output from the while loop.
 This way I can login to the server and reach all my devices like raspberry
 pi's, NAS, even my own laptop, wherever they are running as long as they have
 internet. Some are behind a few firewalls running at random locations, so not
-easy to connect to.
+easy to connect to. Also setting up those fancy tunnels that would survive
+reboots etc., I wanted it to be as easy as possible and that is another reason
+why I created this tool, it will generate a working systemd service for you.
 
 ## Implementation
 
@@ -27,7 +29,11 @@ It tries to be pro-active in making sure the tunnels are up & running. In
 various occasions I would have stale processes that think they were connected
 but really weren't because the WiFi network changed or whatever. For some
 reason I couldn't rely on the SSH keep alive feature, it simply didn't seem to
-work for me.
+work for me. Also, the server has the same problem, it would never kill off the
+ssh processes that bind to port X, even though there was nobody actually
+providing the service behind the tunnel anymore. I couldn't get this to work
+with the right config settings, but by implementing this project at least I
+know it should always work :)
 
 Now with this tool on the central server a "reaper" runs, that kills stale ssh
 processes that bind ports for tunnels that no longer work.
