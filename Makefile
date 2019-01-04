@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 default:
-	make clean && make build_all && make test
+	make clean && make build && make test
 
 prepare:
 	if ! [[ $$(which go) ]]; then \
