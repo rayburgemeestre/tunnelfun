@@ -50,9 +50,9 @@ func initConfig() {
 		fmt.Println("Can't read config:", err)
 		os.Exit(1)
 	}
-	err := viper.WriteConfig()
-	if err != nil {
-		panic(err)
-	}
+	//err := viper.WriteConfig()
+	//if err != nil {
+	//	panic(err)
+	//}
 	cfgFile = viper.ConfigFileUsed()
 }
