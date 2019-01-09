@@ -88,32 +88,39 @@ var serverCmd = &cobra.Command{
 
 				channel1 := make(chan string, 1)
 				go func() {
-					conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
-					if err != nil {
-						fmt.Println("dial error:", err)
-						return
-					}
-					defer conn.Close()
+                    for {
+                        conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
+                        if err != nil {
+                            fmt.Println("dial error:", err)
+                            continue
+                        }
+                        defer conn.Close()
 
-					buf := make([]byte, 0, 4096)
-					tmp := make([]byte, 256)
-					for {
-						n, err := conn.Read(tmp)
-						if err != nil {
-							if err != io.EOF {
-								fmt.Println("read error:", err)
-							}
-							break
-						}
-						buf = append(buf, tmp[:n]...)
+                        buf := make([]byte, 0, 4096)
+                        tmp := make([]byte, 256)
+                        for {
+                            n, err := conn.Read(tmp)
+                            if err != nil {
+                                if err != io.EOF {
+                                    fmt.Println("read error:", err)
+                                    break
+                                }
+                                time.Sleep(1 * time.Second)
+                                continue
+                            }
+                            buf = append(buf, tmp[:n]...)
 
-						if strings.Contains(string(buf), "SSH") {
-							channel1 <- string(buf)
-							return
-						}
+                            if strings.Contains(string(buf), "SSH") {
+                                fmt.Println("DONE:",string(buf))
+                                channel1 <- string(buf)
+                                return
+                            }
 
-					}
-					channel1 <- string(buf)
+                        }
+                        // wait before retry
+                        fmt.Println("Failed, retry")
+                        time.Sleep(1 * time.Second)
+                    }
 				}()
 				select {
 				case res := <-channel1:
