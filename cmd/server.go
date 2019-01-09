@@ -19,6 +19,9 @@ import (
 	"time"
 )
 
+var channel1 chan string
+var channel2 chan bool
+
 func init() {
 	rootCmd.AddCommand(serverCmd)
 }
@@ -34,6 +37,7 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		m := viper.GetStringSlice("server.tunnelports")
 		timeoutResponse := viper.GetInt("server.timeout.response")
+		timeoutResponseTotal := viper.GetInt("server.timeout.responsetotal")
 		monitoring := map[int]bool{}
 		for _, k := range m {
 			p, err := strconv.Atoi(k)
@@ -86,47 +90,21 @@ var serverCmd = &cobra.Command{
 			go func(port int, pid int) {
 				defer wg.Done()
 
-				channel1 := make(chan string, 1)
-				go func() {
-					conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
-					if err != nil {
-						fmt.Println("dial error:", err)
-						return
-					}
-					defer conn.Close()
+				channel1 = make(chan string, 1)
+				go testTunnel(port, timeoutResponse)
 
-					buf := make([]byte, 0, 4096)
-					tmp := make([]byte, 256)
-					for {
-						n, err := conn.Read(tmp)
-						if err != nil {
-							if err != io.EOF {
-								fmt.Println("read error:", err)
-							}
-							break
-						}
-						buf = append(buf, tmp[:n]...)
-
-						if strings.Contains(string(buf), "SSH") {
-							channel1 <- string(buf)
-							return
-						}
-
-					}
-					channel1 <- string(buf)
-				}()
 				select {
 				case res := <-channel1:
 					if strings.Contains(res, "SSH") {
-						fmt.Println("port", port, "- ok")
+						fmt.Println("port", port, "- ok:", res)
 					} else {
-						fmt.Println("port", port, "- killing pid", pid, "due to unexpected server response")
+						fmt.Println("port", port, "- killing pid", pid, "due to unexpected server response", res)
 						err := syscall.Kill(pid, syscall.SYS_KILL)
 						if err != nil {
 							fmt.Println(err)
 						}
 					}
-				case <-time.After(time.Duration(timeoutResponse) * time.Second):
+				case <-time.After(time.Duration(timeoutResponseTotal) * time.Second):
 					fmt.Println("port", port, "- killing pid", pid, "due to timeout")
 					err := syscall.Kill(pid, syscall.SYS_KILL)
 					if err != nil {
@@ -138,4 +116,45 @@ var serverCmd = &cobra.Command{
 		wg.Wait()
 		fmt.Println("done.")
 	},
+}
+
+func testTunnel(port int, timeoutResponse int) {
+	for {
+		channel2 = make(chan bool, 1)
+
+		go testTunnelOnce(port)
+
+		select {
+		case b := <-channel2:
+			if b {
+			}
+		case <-time.After(time.Duration(timeoutResponse) * time.Second):
+		}
+	}
+}
+
+func testTunnelOnce(port int) {
+	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
+	if err != nil {
+		fmt.Println("dial error:", err)
+		return
+	}
+	defer conn.Close()
+	buf := make([]byte, 0, 4096)
+	tmp := make([]byte, 256)
+	for {
+		n, err := conn.Read(tmp)
+		if err != nil {
+			if err != io.EOF {
+				fmt.Println("read error:", err)
+			}
+			break
+		}
+		buf = append(buf, tmp[:n]...)
+		if strings.Contains(string(buf), "SSH") {
+			channel2 <- true
+			channel1 <- string(buf)
+			return
+		}
+	}
 }

@@ -6,11 +6,12 @@ server:
     - 2001 # machine 2
     - 2002
   timeout:
-    response: 20 # seconds
-        
+    response: 5 # seconds
+    responsetotal: 30 # seconds
+
 client:
   timeout:
-    connect: 20 # seconds
+    connect: 30 # seconds
 
 clients:
 
